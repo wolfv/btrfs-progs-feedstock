@@ -1,3 +1,6 @@
 *.pyc
 
 build_artifacts
+# pixi environments
+.pixi/*
+!.pixi/config.toml

@@ -1,22 +1,24 @@
-{% set version = "5.16.2" %}
+context:
+  version: "6.17.1"
 
 package:
   name: btrfs-progs
-  version: {{ version }}
+  version: ${{ version }}
 
 source:
-  - url: https://mirrors.edge.kernel.org/pub/linux/kernel/people/kdave/btrfs-progs/btrfs-progs-v{{ version }}.tar.xz
-    sha256: 9e9b303a1d0fd9ceaaf204ee74c1c8fa1fd55794e223d9fe2bc62875ecbd53d2
+  - url: https://mirrors.edge.kernel.org/pub/linux/kernel/people/kdave/btrfs-progs/btrfs-progs-v${{ version }}.tar.xz
+    sha256: a4be0a6ebb3c476427fb5d97b2cf027b0ccdb6b0c55ff16323320c1e8cb77658
     patches:
       - 0001-Install-udev-rules-inside-prefix.patch
 
 build:
   number: 0
-  skip: true  # [not linux]
+  skip: not linux
 
 requirements:
   build:
-    - {{ compiler('c') }}
+    - ${{ compiler('c') }}
+    # TODO: add stdlib('c')
     - autoconf >=2.60
     - automake
     - make
@@ -43,20 +45,24 @@ requirements:
     - libudev
   run:
 
-test:
-  commands:
-    - test -f "${PREFIX}/include/btrfs/version.h"
-    - test -f "${PREFIX}/include/btrfsutil.h"
-    - test -f "${PREFIX}/lib/libbtrfs${SHLIB_EXT}"
-    - test -f "${PREFIX}/lib/libbtrfsutil${SHLIB_EXT}"
-    - test -f "${PREFIX}/lib/pkgconfig/libbtrfsutil.pc"
-    - btrfs --help
-    - btrfs --version
+tests:
+  - script:
+      - btrfs --help
+      - btrfs --version
+  - package_contents:
+      include:
+        - btrfs/version.h
+        - btrfsutil.h
+      lib:
+        - btrfs
+        - btrfsutil
+      files:
+        - lib/pkgconfig/libbtrfsutil.pc
 
 about:
-  home: https://btrfs.wiki.kernel.org
-  dev_url: https://github.com/kdave/btrfs-progs
-  doc_url: https://btrfs.wiki.kernel.org/index.php/Category:Manpage
+  homepage: https://btrfs.wiki.kernel.org
+  repository: https://github.com/kdave/btrfs-progs
+  documentation: https://btrfs.wiki.kernel.org/index.php/Category:Manpage
   license: GPL-2.0-only AND LGPL-3.0-or-later
   license_file:
     - COPYING
@@ -66,3 +72,4 @@ about:
 extra:
   recipe-maintainers:
     - mbargull
+    - wolfv
